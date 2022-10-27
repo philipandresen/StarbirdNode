@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "run-dev": "env PC_NAME=PHILIP-PC DB_PASS=12345 node backup.js"
+    "run-dev": "env PC_NAME=PHILIP-PC DB_PASS=12345 node backup.js",
+    "run-prod": "env PC_NAME=SERVER-Z820 DB_PASS=12345 node backup.js"
   },
   "dependencies": {
     "config": "^3.3.8",

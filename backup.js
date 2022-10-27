@@ -12,7 +12,10 @@ const sqlConfig = {
 
 try {
     // make sure that any items are correctly URL encoded in the connection string
-    await sql.connect(sqlConfig);
+    console.info(`Connecting to: ${sqlConfig.user}@${sqlConfig.server}...`)
+    const dbConnection = await sql.connect(sqlConfig);
+    console.info(`Connected successfully.`);
+    console.info(`Backing up ${sqlConfig.database} to ${backupConfig.targetLocation}...`);
     const result = await sql.query(`
         DECLARE @fileName VARCHAR(256) -- filename for backup 
         DECLARE @fileDate VARCHAR(20) -- used for file name
@@ -30,9 +33,10 @@ try {
         SELECT @fileName AS fileName;
     `);
     console.dir(result);
+    console.info(`Closing DB Connection...`)
+    await dbConnection.close();
     const backupFilePath = result.recordset[0].fileName;
     console.info(`Backup completed successfully to ${backupFilePath}`);
 } catch (err) {
     console.error(err);
 }
-process.exit();
