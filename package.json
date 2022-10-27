@@ -2,7 +2,11 @@
   "name": "StarbirdNode",
   "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "run-dev": "env PC_NAME=PHILIP-PC node backup.js"
+  },
   "dependencies": {
+    "config": "^3.3.8",
     "mssql": "^9.0.1"
   }
 }

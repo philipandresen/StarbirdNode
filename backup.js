@@ -1,28 +1,31 @@
 import sql from "mssql";
+import config from "config";
 
-const sqlConfig = {
-    user: 'BackupUser',
-    password: '5889091',
-    database: 'AIM',
-    server: 'PHILIP-PC\\SQLEXPRESS',
-    port: 1433,
-    pool: {
-        max: 10,
-        min: 0,
-        idleTimeoutMillis: 30000
-    },
-    options: {
-        encrypt: false,
-        trustServerCertificate: true // true for local dev / self-signed certs
-    }
-}
-
+const sqlConfig = config.get(`${process.env.PC_NAME}.dbConfig`);
+const backupConfig = config.get(`${process.env.PC_NAME}.backupConfig`);
 
 try {
     // make sure that any items are correctly URL encoded in the connection string
-    await sql.connect(sqlConfig)
-    const result = await sql.query(`select * from dbo.test_data where ID = 2`);
-    console.dir(result)
+    await sql.connect(sqlConfig);
+    const result = await sql.query(`
+        DECLARE @fileName VARCHAR(256) -- filename for backup 
+        DECLARE @fileDate VARCHAR(20) -- used for file name
+
+        SELECT @fileDate =
+               CONVERT(VARCHAR(20), GETDATE(), 112) + '_' + REPLACE(CONVERT(VARCHAR(20), GETDATE(), 108), ':', '')
+        SET @fileName = '${backupConfig.targetLocation}\\${sqlConfig.database}_' + @fileDate + '.bak'
+
+        BACKUP DATABASE ${sqlConfig.database}
+            TO DISK = @fileName
+            WITH FORMAT,
+            MEDIANAME = 'SQLServerBackups',
+            NAME = 'Full Backup of DB: ${sqlConfig.database}';
+        SELECT @fileName AS fileName;
+    `);
+    console.dir(result);
+    const backupFilePath = result.recordset[0].fileName;
+    console.info(`Backup completed successfully to ${backupFilePath}`);
 } catch (err) {
     console.error(err);
 }
+process.exit();
