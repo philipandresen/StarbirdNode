@@ -2,7 +2,7 @@
   "PHILIP-PC": {
     "dbConfig": {
       "user": "BackupAgent",
-      "password": "5889091",
+      "password": "Replace with process.env.DB_PASS",
       "database": "AIM",
       "server": "PHILIP-PC\\SQLEXPRESS",
       "port": 1433,
@@ -19,6 +19,28 @@
     },
     "backupConfig": {
       "targetLocation": "D:\\Programming\\StarbirdNode"
+    }
+  },
+  "SERVER-Z820": {
+    "dbConfig": {
+      "user": "BackupAgent",
+      "password": "Replace with process.env.DB_PASS",
+      "database": "AIM",
+      "server": "SERVER-Z820\\AIMSQL",
+      "port": 1433,
+      "requestTimeout": 240000,
+      "pool": {
+        "max": 10,
+        "min": 0,
+        "idleTimeoutMillis": 30000
+      },
+      "options": {
+        "encrypt": false,
+        "trustServerCertificate": true
+      }
+    },
+    "backupConfig": {
+      "targetLocation": "C:\\AIMBackups"
     }
   }
 }

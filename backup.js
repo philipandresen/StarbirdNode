@@ -1,8 +1,14 @@
 import sql from "mssql";
 import config from "config";
 
-const sqlConfig = config.get(`${process.env.PC_NAME}.dbConfig`);
+const dbConfig = config.get(`${process.env.PC_NAME}.dbConfig`);
 const backupConfig = config.get(`${process.env.PC_NAME}.backupConfig`);
+
+// Don't store Password in the config, but inject at runtime.
+const sqlConfig = {
+    ...dbConfig,
+    password: process.env.DB_PASS,
+};
 
 try {
     // make sure that any items are correctly URL encoded in the connection string
@@ -20,6 +26,7 @@ try {
             WITH FORMAT,
             MEDIANAME = 'SQLServerBackups',
             NAME = 'Full Backup of DB: ${sqlConfig.database}';
+        
         SELECT @fileName AS fileName;
     `);
     console.dir(result);
