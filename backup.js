@@ -1,6 +1,6 @@
 import sql from "mssql";
 import config from "config";
-import compress from "./compress.js";
+import { log } from "./utils.js";
 
 export default async function backup() {
     const dbConfig = config.get(`${process.env.PC_NAME}.dbConfig`);
@@ -13,16 +13,16 @@ export default async function backup() {
     };
 
 
-    console.info(`Connecting to: ${sqlConfig.user}@${sqlConfig.server}...`)
+    log(`Connecting to: ${sqlConfig.user}@${sqlConfig.server}...`)
 
     const dbConnection = await sql
         .connect(sqlConfig)
         .catch(err => {
             console.error('Failed to connect to DB:', err)
         });
-    console.info(`Connected successfully.`)
+    log(`Connected successfully.`)
 
-    console.info(`Backing up ${sqlConfig.database} to ${backupConfig.targetLocation}...`);
+    log(`Backing up ${sqlConfig.database} to ${backupConfig.targetLocation}...`);
 
     const result = await sql
         .query(`
@@ -41,16 +41,16 @@ export default async function backup() {
 
         SELECT @fileName AS fullFilePath;
     `).catch(err => {
-            console.error('Failed to run backup commend:', err)
+            log(`Failed to run backup command: ${err}`, console.error);
         });
 
-    console.info(`Closing DB Connection...`)
+    log(`Closing DB Connection...`)
     await dbConnection.close().catch(err => {
-        console.error('Failed to close connection:', err)
+        log(`Failed to close connection: ${err}`, console.error)
     });
 
     const backupFullFilePath = result.recordset[0].fullFilePath;
-    console.info(`Backup completed successfully to ${backupFullFilePath}`);
+    log(`Backup completed successfully to ${backupFullFilePath}`);
 
     return backupFullFilePath;
 }

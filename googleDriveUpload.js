@@ -1,6 +1,7 @@
 import {drive as googleDrive, auth} from "@googleapis/drive"
 import fs from "fs";
 import config from "config";
+import { log } from "./utils.js";
 
 const driveConfig = config.get(`${process.env.PC_NAME}.googleDriveConfig`);
 
@@ -15,7 +16,7 @@ const drive = googleDrive({
 })
 
 export default async function upload(fullFilePath) {
-    console.info('Uploading file to google drive...')
+    log('Uploading file to google drive...')
     const plainFileName = fullFilePath.split('\\').pop().split('/').pop();
     const res = await drive.files.create({
         requestBody: {
@@ -27,8 +28,8 @@ export default async function upload(fullFilePath) {
             mimeType: 'application/zip',
             body: fs.createReadStream(fullFilePath)
         }
-    }).catch(console.error);
-    console.log(`Uploaded file ${res?.data?.name} with drive ID of: ${res?.data?.id}`);
+    }).catch(log);
+    log(`Uploaded file ${res?.data?.name} with drive ID of: ${res?.data?.id}`);
 }
 
 export async function cleanUpDrive() {
@@ -45,7 +46,7 @@ export async function cleanUpDrive() {
         })
     ))
 
-    console.info(`There are ${fileDetails.length} backups available on drive.`)
+    log(`There are ${fileDetails.length} backups available on drive.`)
 
     const sevenDaysMs = 7*24*60*60*1000
     const lastWeek = new Date( Date.now() - sevenDaysMs);
@@ -55,7 +56,7 @@ export async function cleanUpDrive() {
     })
 
     await Promise.all(oldFiles.map(oldFile => {
-        console.info(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime)/100/60/60/24)/10} days old`)
+        log(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime)/100/60/60/24)/10} days old`)
         return drive.files.delete({
             fileId: oldFile.id
         })

@@ -1,5 +1,6 @@
 import fs from "fs";
 import config from "config";
+import { log } from "./utils.js";
 
 export default function cleanup() {
     const dbConfig = config.get(`${process.env.PC_NAME}.dbConfig`);
@@ -12,7 +13,8 @@ export default function cleanup() {
             return fileName.startsWith(dbConfig.database) && (fileName.endsWith('.bak') || fileName.endsWith('.zip'));
         })
         .map(filename => `${backupConfig.targetLocation}\\${filename}`);
-    console.log(`Found ${existingBackups.length} existing backup files.`);
+
+    log(`Found ${existingBackups.length} existing backup files.`);
 
     const oldBackups = existingBackups
         .filter(existingBackup => {
@@ -20,10 +22,10 @@ export default function cleanup() {
             return stats.mtime < yesterday;
         });
 
-    console.log(`Of those, ${oldBackups.length} can be deleted due to being more than ${twentySixHoursMs / 60 / 60 / 1000} hours old.`);
+    log(`Of those, ${oldBackups.length} can be deleted due to being more than ${twentySixHoursMs / 60 / 60 / 1000} hours old.`);
 
     if (existingBackups.length <= 2) {
-        console.warn('Backups will not be deleted because that would leave fewer than two backups.')
+        log('Backups will not be deleted because that would leave fewer than two backups.', console.warn);
     } else {
         oldBackups.forEach(oldBackup => {
             fs.unlink(oldBackup, () => console.info(`deleted ${oldBackup}`));
