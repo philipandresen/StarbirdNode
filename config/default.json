@@ -45,6 +45,10 @@
     },
     "backupConfig": {
       "targetLocation": "C:\\AIMBackups"
+    },
+    "googleDriveConfig": {
+      "folderId":  "1YmkSrUdb-U1FHTf9S8VJk_NKtVA7z_f_",
+      "keyFileLocation": "C:\\StarbirdNode\\starbirdz820-4107b4d2c753.json"
     }
   }
 }
