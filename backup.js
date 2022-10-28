@@ -1,22 +1,31 @@
 import sql from "mssql";
 import config from "config";
+import compress from "./compress.js";
 
-const dbConfig = config.get(`${process.env.PC_NAME}.dbConfig`);
-const backupConfig = config.get(`${process.env.PC_NAME}.backupConfig`);
+export default async function backup() {
+    const dbConfig = config.get(`${process.env.PC_NAME}.dbConfig`);
+    const backupConfig = config.get(`${process.env.PC_NAME}.backupConfig`);
 
 // Don't store Password in the config, but inject at runtime.
-const sqlConfig = {
-    ...dbConfig,
-    password: process.env.DB_PASS,
-};
+    const sqlConfig = {
+        ...dbConfig,
+        password: process.env.DB_PASS,
+    };
 
-try {
-    // make sure that any items are correctly URL encoded in the connection string
+
     console.info(`Connecting to: ${sqlConfig.user}@${sqlConfig.server}...`)
-    const dbConnection = await sql.connect(sqlConfig);
-    console.info(`Connected successfully.`);
+
+    const dbConnection = await sql
+        .connect(sqlConfig)
+        .catch(err => {
+            console.error('Failed to connect to DB:', err)
+        });
+    console.info(`Connected successfully.`)
+
     console.info(`Backing up ${sqlConfig.database} to ${backupConfig.targetLocation}...`);
-    const result = await sql.query(`
+
+    const result = await sql
+        .query(`
         DECLARE @fileName VARCHAR(256) -- filename for backup 
         DECLARE @fileDate VARCHAR(20) -- used for file name
 
@@ -29,14 +38,20 @@ try {
             WITH FORMAT,
             MEDIANAME = 'SQLServerBackups',
             NAME = 'Full Backup of DB: ${sqlConfig.database}';
-        
-        SELECT @fileName AS fileName;
-    `);
-    console.dir(result);
+
+        SELECT @fileName AS fullFilePath;
+    `).catch(err => {
+            console.error('Failed to run backup commend:', err)
+        });
+
     console.info(`Closing DB Connection...`)
-    await dbConnection.close();
-    const backupFilePath = result.recordset[0].fileName;
-    console.info(`Backup completed successfully to ${backupFilePath}`);
-} catch (err) {
-    console.error(err);
+    await dbConnection.close().catch(err => {
+        console.error('Failed to close connection:', err)
+    });
+
+    const backupFullFilePath = result.recordset[0].fullFilePath;
+    console.info(`Backup completed successfully to ${backupFullFilePath}`);
+
+    return backupFullFilePath;
 }
+

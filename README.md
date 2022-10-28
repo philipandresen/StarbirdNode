@@ -25,3 +25,16 @@ but it does not yet compress / archive / encrypt that backup (SQL express doesn'
 so I need to get a library to do that still. It also does not upload the backup anywhere. This is all
 maintained in Git also, so checking out `Master` is a good idea before running the script. Might work
 that into the windows bat file process.
+
+## Example .bat file content:
+```BAT
+git pull origin master
+CALL npm install
+SET PC_NAME=SERVER-Z820
+SET DB_PASS=SUPER_SECRET_PASSWORD
+CALL node backup.js >> log.txt
+```
+* We pull origin master to ensure we have the latest version of the script 
+* We NPM install to take care of all dependencies 
+* We set environment variables 
+* Then we call the backup script. Logs are appended to log.txt.
