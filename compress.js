@@ -13,15 +13,14 @@ export default async function compress(backupFullFilePath) {
     });
 
     output.on('close', () => {
-        console.info(`Compressed to ${Math.round(archive.pointer()/10000)/10} MB.`);
         console.info('archiver has been finalized and the output file descriptor has closed.');
     });
 
-    output.on('end', function() {
+    output.on('end', function () {
         console.log('Data has been drained');
     });
 
-    archive.on('warning', function(err) {
+    archive.on('warning', function (err) {
         if (err.code === 'ENOENT') {
             // log warning
         } else {
@@ -30,7 +29,7 @@ export default async function compress(backupFullFilePath) {
         }
     });
 
-    archive.on('error', function(err) {
+    archive.on('error', function (err) {
         throw err;
     });
 
@@ -39,11 +38,10 @@ export default async function compress(backupFullFilePath) {
 
     console.info(`Adding ${backupFullFilePath} to archive...`);
 // append a file
-    archive.file(backupFullFilePath, { name: 'AIM.bak' });
+    archive.file(backupFullFilePath, {name: 'AIM.bak'});
     console.info('finalizing archive...');
     await archive.finalize();
-    fs.stat(backupFullFilePath, (err, stats) => {
-        console.log(`Final size is ${Math.round(archive.pointer() / 10000)/10} MB, ratio of ${stats.size / archive.pointer()}`);
-    });
+    const stats = fs.statSync(backupFullFilePath);
+    console.log(`Final size is ${Math.round(archive.pointer() / 10000) / 100} MB, with a compression ratio of about ${Math.round(stats.size / archive.pointer())}`);
     return zipFullPath;
 }

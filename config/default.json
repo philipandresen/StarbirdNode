@@ -19,6 +19,10 @@
     },
     "backupConfig": {
       "targetLocation": "D:\\Programming\\StarbirdNode"
+    },
+    "googleDriveConfig": {
+      "folderId":  "1Cej8QbR6RL5MAHriax4qjhM7kClwF8v5",
+      "keyFileLocation": "D:\\Programming\\StarbirdNode\\personalautouploadtest-8a206d207672.json"
     }
   },
   "SERVER-Z820": {
