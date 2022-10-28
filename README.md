@@ -17,7 +17,9 @@ about as much when you run the script)
 10. Create a folder in google drive using the UI and share it with the service account you created (The console should 
 provide you an email for that account)
 11. execute the following command in the project folder 
-    1. `env PC_NAME=SERVER-Z820 DB_PASS=[whatever you set your backup user password to] node main.js`
+    1. `env PC_NAME=SERVER-Z820 DB_PASS=[???] BKP_PASS=[???] node main.js`
+       1. DB_Pass is the password to the database for the Backup user
+       2. BKP_PASS is the desired password on the encrypted Zip file
 
 ## Sometimes:
 If the PC name ever changes you may need to update the configs to match. You'll notice I have a config for each PC the 
