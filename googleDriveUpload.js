@@ -39,8 +39,8 @@ export async function uploadLog() {
 
 export async function cleanUpDrive() {
     const res = await drive.files.list();
-    const files = res.data.files;
-    const fileDetails = await Promise.all(files.map(file => drive.files.get({
+    const backups = res.data.files.filter(file => file.name.endsWith('.zip'));
+    const backupDetails = await Promise.all(backups.map(file => drive.files.get({
             fileId: file.id,
             fields: 'createdTime, id, name'
         }).then(({data}) => {
@@ -51,17 +51,17 @@ export async function cleanUpDrive() {
         })
     ))
 
-    log(`There are ${fileDetails.length} backups available on drive.`)
+    log(`There are ${backupDetails.length} backups available on drive.`)
 
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
     const lastWeek = new Date(Date.now() - sevenDaysMs);
 
-    const oldFiles = fileDetails.filter(file => {
+    const oldBackups = backupDetails.filter(file => {
         return file.createdTime < lastWeek
     })
 
-    if ((fileDetails.length - oldFiles.length) < 7) {
-        await Promise.all(oldFiles.map(oldFile => {
+    if ((backupDetails.length - oldBackups.length) < 7) {
+        await Promise.all(oldBackups.map(oldFile => {
             log(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime) / 100 / 60 / 60 / 24) / 10} days old`)
             return drive.files.delete({
                 fileId: oldFile.id
