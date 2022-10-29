@@ -1,6 +1,6 @@
 import fs from "fs";
 import archiver from "archiver";
-import { log } from "./utils.js";
+import {log} from "./utils.js";
 
 export default async function compress(backupFullFilePath) {
     const zipFullPath = backupFullFilePath.replace('.bak', '.zip');

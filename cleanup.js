@@ -1,6 +1,6 @@
 import fs from "fs";
 import config from "config";
-import { log } from "./utils.js";
+import {log} from "./utils.js";
 
 export default function cleanup() {
     const dbConfig = config.get(`${process.env.PC_NAME}.dbConfig`);
