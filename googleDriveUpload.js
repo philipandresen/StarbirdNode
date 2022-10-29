@@ -60,12 +60,17 @@ export async function cleanUpDrive() {
         return file.createdTime < lastWeek
     })
 
-    await Promise.all(oldFiles.map(oldFile => {
-        log(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime) / 100 / 60 / 60 / 24) / 10} days old`)
-        return drive.files.delete({
-            fileId: oldFile.id
-        })
-    }));
+    if ((fileDetails.length - oldFiles.length) < 7) {
+        await Promise.all(oldFiles.map(oldFile => {
+            log(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime) / 100 / 60 / 60 / 24) / 10} days old`)
+            return drive.files.delete({
+                fileId: oldFile.id
+            })
+        }));
+    } else {
+        // Would be a good opportunity to send an email to someone or something.
+        log('-----!!! WARNING, DRIVE CLEANUP SKIPPED BECAUSE THERE ARENT ENOUGH BACKUPS ON DRIVE !!!------');
+    }
 }
 
 /**
