@@ -1,7 +1,7 @@
 import {drive as googleDrive, auth} from "@googleapis/drive"
 import fs from "fs";
 import config from "config";
-import { log } from "./utils.js";
+import {log} from "./utils.js";
 
 const driveConfig = config.get(`${process.env.PC_NAME}.googleDriveConfig`);
 
@@ -15,7 +15,7 @@ const drive = googleDrive({
     auth: googleAuth
 })
 
-export default async function upload(fullFilePath) {
+export default async function uploadBackup(fullFilePath) {
     log('Uploading file to google drive...')
     const plainFileName = fullFilePath.split('\\').pop().split('/').pop();
     const res = await drive.files.create({
@@ -30,6 +30,11 @@ export default async function upload(fullFilePath) {
         }
     }).catch(log);
     log(`Uploaded file ${res?.data?.name} with drive ID of: ${res?.data?.id}`);
+}
+
+export async function uploadLog() {
+    log('Uploading Logs to google drive...')
+    return upsertUnique('log.txt', 'text/plain');
 }
 
 export async function cleanUpDrive() {
@@ -48,17 +53,61 @@ export async function cleanUpDrive() {
 
     log(`There are ${fileDetails.length} backups available on drive.`)
 
-    const sevenDaysMs = 7*24*60*60*1000
-    const lastWeek = new Date( Date.now() - sevenDaysMs);
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
+    const lastWeek = new Date(Date.now() - sevenDaysMs);
 
     const oldFiles = fileDetails.filter(file => {
         return file.createdTime < lastWeek
     })
 
     await Promise.all(oldFiles.map(oldFile => {
-        log(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime)/100/60/60/24)/10} days old`)
+        log(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime) / 100 / 60 / 60 / 24) / 10} days old`)
         return drive.files.delete({
             fileId: oldFile.id
         })
     }));
+}
+
+/**
+ * Goes to google drive and checks for all instances of a file with the given name. If multiple exist, it chooses one
+ * and updates it, deleting the others. If zero exist, it creates the file. If exactly one exists, it updates that one.
+ * @param filePath
+ * @param mimeFormat
+ * @returns {Promise<void>}
+ */
+async function upsertUnique(filePath, mimeFormat) {
+    const fileName = filePath.split('\\').pop().split('/').pop();
+
+    const allFiles = await drive.files.list().then(res => res.data.files);
+    const existingFiles = allFiles.filter(file => file.name === fileName);
+
+    await Promise.all(existingFiles.map((file, index) => {
+        if (index > 0) {
+            return drive.files.delete({
+                fileId: file.id
+            }).catch(log);
+        } else {
+            return drive.files.update({
+                fileId: file.id,
+                media: {
+                    mimeType: mimeFormat,
+                    body: fs.createReadStream(filePath)
+                }
+            }).catch(log);
+        }
+    }));
+
+    if (existingFiles.length === 0) {
+        await drive.files.create({
+            requestBody: {
+                name: fileName,
+                mimeType: mimeFormat,
+                parents: [driveConfig.folderId] // The ID of the shared folder
+            },
+            media: {
+                mimeType: mimeFormat,
+                body: fs.createReadStream(filePath)
+            }
+        }).catch(log);
+    }
 }

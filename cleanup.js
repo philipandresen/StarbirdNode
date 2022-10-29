@@ -28,7 +28,7 @@ export default function cleanup() {
         log('Backups will not be deleted because that would leave fewer than two backups.', console.warn);
     } else {
         oldBackups.forEach(oldBackup => {
-            fs.unlink(oldBackup, () => console.info(`deleted ${oldBackup}`));
+            fs.unlink(oldBackup, () => log(`deleted ${oldBackup}`));
         })
     }
 }

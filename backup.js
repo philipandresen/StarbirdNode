@@ -18,7 +18,7 @@ export default async function backup() {
     const dbConnection = await sql
         .connect(sqlConfig)
         .catch(err => {
-            console.error('Failed to connect to DB:', err)
+            log(`Failed to connect to DB: ${err}`, console.error)
         });
     log(`Connected successfully.`)
 
