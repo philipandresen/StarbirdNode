@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "backup-dev": "env PC_NAME=PHILIP-PC DB_PASS=12345 BKP_PASS=123456789 SENDGRID_API_KEY=[API KEY HERE] node main.js",
+    "backup-dev": "env PC_NAME=PHILIP-PC DB_PASS=12345 BKP_PASS=123456789 SENDGRID_API_KEY=[API_KEY_HERE] node main.js",
     "backup-prod": "env PC_NAME=SERVER-Z820 DB_PASS=12345 node main.js"
   },
   "dependencies": {

@@ -60,7 +60,9 @@ export async function cleanUpDrive() {
         return file.createdTime < lastWeek
     })
 
-    if ((backupDetails.length - oldBackups.length) < 7) {
+    log(`There are ${oldBackups.length} backups on drive that are older than 7 days.`)
+
+    if ((backupDetails.length - oldBackups.length) >= 7) {
         await Promise.all(oldBackups.map(oldFile => {
             log(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime) / 100 / 60 / 60 / 24) / 10} days old`)
             return drive.files.delete({
