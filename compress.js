@@ -1,8 +1,57 @@
 import fs from "fs";
 import archiver from "archiver";
 import {log} from "./utils.js";
+import sevenZip from "node-7z";
+import sevenZipBin from '7zip-bin';
 
+const sevenZipLocation = sevenZipBin.path7za;
+
+/**
+ * Attempts to compress with 7zip and falls back to regular zip otherwise.
+ * @param backupFullFilePath
+ * @returns {Promise<void>}
+ */
 export default async function compress(backupFullFilePath) {
+    return compressSevenZip(backupFullFilePath).catch(err => {
+        log(err);
+        return compressZip(backupFullFilePath);
+    })
+}
+
+/**
+ * Takes the file located at backupFullFilePath and puts it into a compressed 7zip archive with a password
+ * @param backupFullFilePath
+ * @returns {Promise<void>} the full file path of the compressed .7z file.
+ */
+async function compressSevenZip(backupFullFilePath) {
+    const sevenZipFullPath = backupFullFilePath.replace('.bak', '.7z');
+    log(`Creating .7z archive at ${sevenZipFullPath}`);
+    return new Promise((resolve, reject) => {
+        const archiveStream = sevenZip.add(sevenZipFullPath, backupFullFilePath, {
+            $bin: sevenZipLocation,
+            method: ['x=9'],
+            password: process.env.BKP_PASS
+        })
+        archiveStream.on('end', () => {
+            log(`Compression completed successfully.`)
+            const statsBackup = fs.statSync(backupFullFilePath);
+            const statsArchive = fs.statSync(sevenZipFullPath);
+            log(`Final size is ${Math.round(statsArchive.size / 10000) / 100} MB, with a compression ratio of about ${Math.round(statsBackup.size / statsArchive.size)}`);
+            resolve(sevenZipFullPath);
+        });
+        archiveStream.on('error', err => {
+            log('Compression with 7zip failed');
+            reject(err);
+        });
+    })
+}
+
+/**
+ * Takes the file at backupFullFilePath and puts it into a zip archive with a password.
+ * @param backupFullFilePath
+ * @returns {Promise<*>} The full file path to the output zip file.
+ */
+async function compressZip(backupFullFilePath) {
     const zipFullPath = backupFullFilePath.replace('.bak', '.zip');
     const output = fs.createWriteStream(zipFullPath);
 

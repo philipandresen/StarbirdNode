@@ -18,10 +18,14 @@ In order to run this application locally you will need to have:
 9. Make sure you enable google drive API access in your project in Google Cloud console.
 10. Create a folder in google drive using the UI and share it with the service account you created (The console should
     provide you an email for that account)
-11. execute the following command in the project folder
-    1. `env PC_NAME=SERVER-Z820 DB_PASS=[???] BKP_PASS=[???] node main.js`
+11. Make sure you have 7zip installed and the path is referenced although if you do not do this there will be a regular
+    zip fallback, and I am also including a 7zip executable in this project, so in most cases you don't need to do
+    anything
+12. execute the following command in the project folder
+    1. `env PC_NAME=SERVER-Z820 DB_PASS=[???] BKP_PASS=[???] SENDGRID_API_KEY=[???] node main.js`
         1. DB_Pass is the password to the database for the Backup user
         2. BKP_PASS is the desired password on the encrypted Zip file
+        3. SENDGRID_API_KEY is the API key for a sendgrid account for sending error emails.
 
 ## Sometimes:
 

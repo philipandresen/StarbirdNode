@@ -9,9 +9,11 @@
   "dependencies": {
     "@googleapis/drive": "^3.0.1",
     "@sendgrid/mail": "^7.7.0",
+    "7zip-bin": "^5.2.0",
     "archiver": "^5.3.1",
     "archiver-zip-encrypted": "^1.0.11",
     "config": "^3.3.8",
-    "mssql": "^9.0.1"
+    "mssql": "^9.0.1",
+    "node-7z": "^3.0.0"
   }
 }

@@ -2,6 +2,7 @@ import {drive as googleDrive, auth} from "@googleapis/drive"
 import fs from "fs";
 import config from "config";
 import {log} from "./utils.js";
+import {notifyError} from "./sendgridEmail.js";
 
 const driveConfig = config.get(`${process.env.PC_NAME}.googleDriveConfig`);
 
@@ -17,15 +18,23 @@ const drive = googleDrive({
 
 export default async function uploadBackup(fullFilePath) {
     log('Uploading file to google drive...')
+    // Just pulled this next line from stack overflow. It works! Don't question it!
     const plainFileName = fullFilePath.split('\\').pop().split('/').pop();
+    // Assume archives are 7zip format
+    let mimeType = 'application/x-7z-compressed';
+    // But we still fall back to .zip if there was an issue with the 7zip compression.
+    if (plainFileName.endsWith('.zip')) {
+        mimeType = 'application/zip'
+    }
+
     const res = await drive.files.create({
         requestBody: {
             name: plainFileName,
-            mimeType: 'application/zip',
+            mimeType,
             parents: [driveConfig.folderId] // The ID of the shared folder
         },
         media: {
-            mimeType: 'application/zip',
+            mimeType,
             body: fs.createReadStream(fullFilePath)
         }
     }).catch(log);
@@ -39,7 +48,7 @@ export async function uploadLog() {
 
 export async function cleanUpDrive() {
     const res = await drive.files.list();
-    const backups = res.data.files.filter(file => file.name.endsWith('.zip'));
+    const backups = res.data.files.filter(file => file.name.endsWith('.zip') || file.name.endsWith('.7z'));
     const backupDetails = await Promise.all(backups.map(file => drive.files.get({
             fileId: file.id,
             fields: 'createdTime, id, name'
@@ -70,8 +79,10 @@ export async function cleanUpDrive() {
             })
         }));
     } else {
-        // Would be a good opportunity to send an email to someone or something.
         log('-----!!! WARNING, DRIVE CLEANUP SKIPPED BECAUSE THERE ARENT ENOUGH BACKUPS ON DRIVE !!!------');
+        await notifyError('Warning! The drive cleanup process did not delete any backups because that would leave' +
+            ' fewer than 7 on drive. This situation typically would only arise if new backups were not going to google' +
+            ' drive as expected.');
     }
 }
 

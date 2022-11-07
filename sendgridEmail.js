@@ -20,6 +20,7 @@ export async function notifyError(err) {
             log(`Email sent to ${msg.to} with cc to: ${msg.cc}`);
         })
         .catch((error) => {
-            log(error);
+            log(`Sendgrid failed to notify of an error: ${error}`);
+            log(err);
         })
 }
