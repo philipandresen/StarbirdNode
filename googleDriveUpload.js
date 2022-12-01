@@ -73,7 +73,7 @@ export async function cleanUpDrive() {
 
     if ((backupDetails.length - oldBackups.length) >= 7) {
         await Promise.all(oldBackups.map(oldFile => {
-            log(`Deleting old file from drive as it is ${Math.round((Date.now() - oldFile.createdTime) / 100 / 60 / 60 / 24) / 10} days old`)
+            log(`Deleting ${oldFile.name} from drive as it is ${Math.round((Date.now() - oldFile.createdTime) / 100 / 60 / 60 / 24) / 10} days old`)
             return drive.files.delete({
                 fileId: oldFile.id
             })

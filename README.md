@@ -6,15 +6,16 @@ This is a simple node application for performing automated administrative tasks 
 
 In order to run this application locally you will need to have:
 
-1. Setup a config profile for the PC running the app in default.json
+1. Set up a config profile for the PC running the app in default.json
+   1. You should be able to follow the pattern in that file.
 2. Installed Node (v19 was used in development, but 18 is probably okay too)
-3. Checked out the code from the repo (downloaded the project to some local directory)
-4. Run NPM install (Maybe, I might also include that in the run script in package.json)
-5. Ensure your backup directory is one that your backup user has access to (if you don't you'll see an error saying
-   about as much when you run the script)
+3. Checked out the code from the repo (can be done automatically with a bat file command)
+4. Run NPM install (Can be done automatically with a bat file command)
+5. Ensure your local backup directory is one that your local backup user has access to (if you don't you'll see an error 
+   saying as much when you run the script)
 6. Create a service account through the Google Cloud Console (https://console.cloud.google.com)
 7. Make sure your service account has Editor access (probably?) and generate a key file for that service account
-8. Download the key file and put it somewhere, point to it in the (drive configuration subsection of the) config
+8. Download the key file and put it somewhere, point to it in the drive configuration subsection of the config
 9. Make sure you enable google drive API access in your project in Google Cloud console.
 10. Create a folder in google drive using the UI and share it with the service account you created (The console should
     provide you an email for that account)
@@ -26,6 +27,7 @@ In order to run this application locally you will need to have:
         1. DB_Pass is the password to the database for the Backup user
         2. BKP_PASS is the desired password on the encrypted Zip file
         3. SENDGRID_API_KEY is the API key for a sendgrid account for sending error emails.
+           1. If this is not included, or is wrong, the app will still work, you will just get errors in the log only.
 
 ## Sometimes:
 
@@ -43,20 +45,15 @@ script runs on, my personal one and the server itself.
 
 ## Actual function
 
-This is likely going to be run via the windows task scheduler through a windows .bat file calling the
-node script. What it should be doing is:
+This will usually run via the windows task scheduler through a windows .bat file calling the
+node script. What the program does at a high level is:
 
-1. Connecting to the database specified in the default.json config for the given `PC_NAME`
-2. Create a backup of that database to the directory specified in the config
-3. Archive that backup / compress it / encrypt it with a password
-4. Upload the resulting archive to google drive or Alex's Ermine Server. Or both. Who knows.
-5. Clean up files locally and on drive. Starting out I set it to 26 hours expiry on local and 7 day expiry on drive
-
-I'm writing this readme at the state where the script can perform a backup by itself if given a config,
-but it does not yet compress / archive / encrypt that backup (SQL express doesn't support it natively)
-so I need to get a library to do that still. It also does not upload the backup anywhere. This is all
-maintained in Git also, so checking out `Master` is a good idea before running the script. Might work
-that into the windows bat file process.
+1. Connect to the database specified in the default.json config for the given `PC_NAME`
+2Create a backup of that database to the directory specified in the config
+2. Archive that backup / compress it / encrypt it with a password
+3. Upload the resulting archive to google drive.
+   1. This is done via a service account which has its own drive space (15GB by default from Google)
+4. Clean up files locally and on drive. Starting out I set it to 26 hours expiry on local and 7 day expiry on drive
 
 ## Example .bat file content:
 
@@ -76,8 +73,10 @@ CALL node backup.js >> log.txt
 * We set environment variables
 * Then we call the backup script. Logs are appended to log.txt.
 
-## Additional improvements / TODOs
+## Decompressing backups
+Backups are compressed using 7Zip by default, or if that fails, they will be compressed using the regular zip format.
+Both formats include encryption / password protection. The password will be passed into the script as part of the
+batch file arguments (see the example bat file above). This password should also be stored in a password manager.
 
-* Clean up files a little more intelligently, rather than keeping pairs of files, maybe delete either archives or .baks
-  every time
-* Send logs somewhere. Right now we are piping
+Windows can natively decompress zip files, but you will need to go to https://www.7-zip.org/ to get the 7Zip app. 
+7Zip is actually a prerequisite of this program, but it is included / installed as part of the automated deployment.
