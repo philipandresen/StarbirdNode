@@ -10,7 +10,10 @@ export default function cleanup() {
 
     const existingBackups = fs.readdirSync(backupConfig.targetLocation)
         .filter(fileName => {
-            return fileName.startsWith(dbConfig.database) && (fileName.endsWith('.bak') || fileName.endsWith('.zip'));
+            return fileName.startsWith(dbConfig.database) && (
+                fileName.endsWith('.bak') ||
+                fileName.endsWith('.zip') ||
+                fileName.endsWith('.7z'));
         })
         .map(filename => `${backupConfig.targetLocation}\\${filename}`);
 
