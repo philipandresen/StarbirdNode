@@ -18,7 +18,8 @@
       }
     },
     "backupConfig": {
-      "targetLocation": "D:\\Programming\\StarbirdNode"
+      "targetLocation": "D:\\Programming\\StarbirdNode",
+      "attachmentsLocation": "C:\\Users\\PHILIP\\Documents\\my games\\Wesnoth1.14"
     },
     "googleDriveConfig": {
       "folderId":  "1Cej8QbR6RL5MAHriax4qjhM7kClwF8v5",
@@ -44,7 +45,8 @@
       }
     },
     "backupConfig": {
-      "targetLocation": "C:\\AIMBackups"
+      "targetLocation": "C:\\AIMBackups",
+      "attachmentsLocation": "C:\\AIM\\Attachments"
     },
     "googleDriveConfig": {
       "folderId":  "1YmkSrUdb-U1FHTf9S8VJk_NKtVA7z_f_",
